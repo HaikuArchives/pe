@@ -54,6 +54,7 @@ static BString sTempFilePath;
 void DoError(const char *e, ...);
 void Usage(bool error);
 void OpenInPe(entry_ref& ref, int lineNr);
+void OpenInPeDiff(const BString filename1, const BString filename2);
 
 void Usage(bool error)
 {
@@ -62,6 +63,8 @@ void Usage(bool error)
 	puts("If no file has been specified, copy stdin to a temporary file and");
 	puts("open that. In that case <fileType> specifies the file extension to");
 	puts("be used to help Pe recognize the content type.");
+	puts("Alternatively: lpe --diff file1 file2");
+	puts("Will open Pe in \"diff mode\" if it is not already running.");
 	exit(error ? 1 : 0);
 } /* Usage */
 
@@ -140,6 +143,28 @@ void OpenInPe(entry_ref& doc, int lineNr)
 } /* OpenInPe */
 
 
+void OpenInPeDiff(const BString filename1, const BString filename2)
+{
+	entry_ref pe;
+	if (be_roster->FindApp("application/x-vnd.beunited.pe", &pe))
+		DoError("Could not find Pe!");
+
+	if (be_roster->IsRunning(&pe))
+		DoError("Cannot invoke diff mode when Pe is already running.");
+
+	BMessage msg(B_ARGV_RECEIVED), reply;
+	msg.AddInt32("argc", 4);
+	msg.AddString("argv", "Pe");
+	msg.AddString("argv", "--diff");
+	msg.AddString("argv", filename1);
+	msg.AddString("argv", filename2);
+
+	team_id team;
+	status_t err = be_roster->Launch(&pe, &msg, &team);
+	if (err) DoError("Error launching Pe (%s)", strerror(err));
+}
+
+
 static void
 remove_temp_file()
 {
@@ -157,8 +182,10 @@ int main(int argc, char *argv[])
 	status_t	err;
 	BEntry		e;
 	BString		path;
+	BString		path2;
 	int			nr;
 	bool		pathSeen = false;
+	bool		callDiff = false;
 	const char*	fileType = NULL;
 
 	while (++i < argc)
@@ -184,12 +211,34 @@ int main(int argc, char *argv[])
 					fileType = argv[i];
 					break;
 				}
+
+				if (strcmp(argv[i], "--diff") == 0) {
+					callDiff = true;
+					break;
+				}
+
 				// fall through
 
 			default:
 			{
 				pathSeen = true;
-				path = argv[i];
+				if (!callDiff)
+				{
+					path = argv[i];
+				}
+				else
+				{
+					if (path.IsEmpty())
+					{
+						path = argv[i];
+						break;
+					}
+					else
+					{
+						path2 = argv[i];
+						break;
+					}
+				}
 				dpPtr = strrchr(argv[i], ':');
 				if (dpPtr != NULL)
 				{
@@ -213,6 +262,14 @@ int main(int argc, char *argv[])
 				lineNr = -1;
 			}
 		}
+	}
+
+	if (callDiff)
+	{
+		if (path.IsEmpty() || path2.IsEmpty())
+			Usage(true);
+		OpenInPeDiff(path, path2);
+		return 0;
 	}
 
 	if (!pathSeen) {
