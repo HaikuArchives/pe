@@ -44,14 +44,14 @@
 #endif
 
 const char kAboutText[] =
-		"Pe 2.4.5 Open Source Version\n\n"
+		"Pe 2.4.6 Open Source Version\n\n"
 		"a high performance editor\n"
 		"created by Maarten Hekkelman.\n"
 		"Hekkelman Programmatuur B.V.\n"
 		"Copyright © 1996, 1997, 1998, 2002.\n\n"
 		"-\n\n"
 		"This is the Open Source version of Pe,\n"
-		"copyright © 2003-2014, Team Pe,\n"
+		"copyright © 2003-2024, Team Pe,\n"
 		"compiled on:\n%s\n\n"
 		"Pe is now hosted at Github:\n"
 		"https://github.com/HaikuArchives/Pe\n\n"
