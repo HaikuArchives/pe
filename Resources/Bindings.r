@@ -343,7 +343,9 @@ resource rtyp_Bind (rid_Bind_EditMenu, "Bindings for edit menu") {
 		Cmd,			0x78,	0,		0,			'CCUT',
 		Cmd|Shift,		0x78,	0,		0,			msg_CutAppend,
 		Cmd|Shift,		0x79,	0,		0,			msg_Redo,
-		Cmd,			0x79,	0,		0,			msg_Undo
+		Cmd,			0x79,	0,		0,			msg_Undo,
+		Cmd|Shift,		0x7a,	0,		0,			msg_Redo,
+		Cmd,			0x7a,	0,		0,			msg_Undo
 	}
 };
 
